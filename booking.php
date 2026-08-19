@@ -1,0 +1,12 @@
+<?php
+require_once 'bootstrap.php';
+$u=user(); $message=flash(); $pageTitle='Book Tech Support | PC World Geek';
+if($_SERVER['REQUEST_METHOD']==='POST'){verify_csrf();$name=trim($_POST['name']??'');$email=trim($_POST['email']??'');$phone=trim($_POST['phone']??'');$service=trim($_POST['service']??'');$date=$_POST['date']??'';$time=$_POST['time']??'';$notes=trim($_POST['notes']??'');
+if(!$name||!filter_var($email,FILTER_VALIDATE_EMAIL)||!$phone||!$service||!$date||!$time){$message='Please complete all required fields.';}else{$s=db()->prepare('INSERT INTO bookings(user_id,name,email,phone,service,preferred_date,preferred_time,notes) VALUES(?,?,?,?,?,?,?,?)');$s->execute([$u['id']??null,$name,$email,$phone,$service,$date,$time,$notes]);flash('Your support request has been received. We will confirm the appointment using the contact details provided.');header('Location: booking.php');exit;}}
+require 'header.php';?>
+<main class="page"><div class="wrap"><span class="eyebrow">BOOK SUPPORT</span><h1>Choose a time for help.</h1><p class="pagelead">Submit your preferred time. This is a request, not a guaranteed appointment until PC World Geek confirms it.</p><?php if($message):?><div class="notice"><?=e($message)?></div><?php endif;?><?php if($m=flash()):?><div class="success"><?=e($m)?></div><?php endif;?>
+<form class="booking-form" method="post"><input type="hidden" name="csrf" value="<?=e(csrf())?>">
+<label>Name<input required name="name" value="<?=e($u['name']??'')?>"></label><label>Email<input required type="email" name="email" value="<?=e($u['email']??'')?>"></label><label>Phone<input required name="phone"></label>
+<label>Service<select required name="service"><option value="">Select</option><option>Computer & laptop support</option><option>Printer support</option><option>Wi-Fi & router support</option><option>Security & malware support</option></select></label>
+<div class="formrow"><label>Preferred date<input required type="date" name="date" min="<?=date('Y-m-d')?>"></label><label>Preferred time<select required name="time"><option>Morning</option><option>Afternoon</option><option>Evening</option><option>Late evening</option></select></label></div>
+<label>What is happening?<textarea name="notes" rows="5" placeholder="Briefly describe the problem"></textarea></label><button class="btn primary" type="submit">Request Appointment →</button></form></div></main><?php require 'footer.php';?>
